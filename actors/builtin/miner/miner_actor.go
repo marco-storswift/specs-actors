@@ -1236,7 +1236,13 @@ func popSectorExpirations(st *State, store adt.Store, epoch abi.ChainEpoch) (*ab
 	var expiredEpochs []abi.ChainEpoch
 	var expiredSectors []*abi.BitField
 	errDone := fmt.Errorf("done")
-	err := st.ForEachSectorExpiration(store, func(expiry abi.ChainEpoch, sectors *abi.BitField) error {
+	err := st.ForEachSectorExpiration(store, func(expiry abi.ChainEpoch, sectorsin *abi.BitField) error {
+		//Copy the value form sectorsin
+		sectors := abi.NewBitField()
+		sectorsin.ForEach(func(snum uint64) error {
+			sectors.Set(snum)
+			return nil
+		})
 		if expiry > epoch {
 			return errDone
 		}
@@ -1266,7 +1272,13 @@ func popExpiredFaults(st *State, store adt.Store, latestTermination abi.ChainEpo
 	var expiredFaults []*abi.BitField
 	var ongoingFaults []*abi.BitField
 	errDone := fmt.Errorf("done")
-	err := st.ForEachFaultEpoch(store, func(faultStart abi.ChainEpoch, faults *abi.BitField) error {
+	err := st.ForEachFaultEpoch(store, func(faultStart abi.ChainEpoch, faultsin *abi.BitField) error {
+		//Copy the value form faultin
+		faults := abi.NewBitField()
+		faultsin.ForEach(func(snum uint64) error {
+			faults.Set(snum)
+			return nil
+		})
 		if faultStart <= latestTermination {
 			expiredFaults = append(expiredFaults, faults)
 			expiredEpochs = append(expiredEpochs, faultStart)
